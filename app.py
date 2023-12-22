@@ -74,7 +74,7 @@ class StreamlitChatPack(BaseLlamaPack):
                 engine = create_engine("sqlite:///ecommerce_platform1.db")
 
             sql_database = SQLDatabase(engine)
-            llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
+            #llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
             service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
 
             return sql_database, service_context, engine
