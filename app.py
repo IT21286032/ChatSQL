@@ -4,6 +4,10 @@ import streamlit as st
 from sqlalchemy import create_engine, inspect, text
 from typing import Dict, Any
 
+from sqlalchemy import create_engine, inspect
+import pandas as pd
+import sqlite3
+
 from llama_index.llama_pack.base import BaseLlamaPack
 from llama_index.llms import OpenAI
 import openai
@@ -40,24 +44,13 @@ from llama_index.indices.struct_store import NLSQLTableQueryEngine
 
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 
-class StreamlitChatPack(BaseLlamaPack):
+class StreamlitChatPack:
+    def __init__(self, run_from_main=False):
+        self.run_from_main = run_from_main
 
-    def __init__(
-        self,
-        page: str = "Natural Language to SQL Query",
-        run_from_main: bool = False,
-        **kwargs: Any,
-    ) -> None:
-        self.page = page
-
-    def get_modules(self) -> Dict[str, Any]:
-        return {}
-
-    def run(self, *args: Any, **kwargs: Any) -> Any:
-        import streamlit as st
-
+    def run(self):
         st.set_page_config(
-            page_title=f"{self.page}",
+            page_title="Natural Language to SQL Query",
             layout="centered",
             initial_sidebar_state="auto",
             menu_items=None,
@@ -65,15 +58,29 @@ class StreamlitChatPack(BaseLlamaPack):
 
         if "messages" not in st.session_state:
             st.session_state["messages"] = [
-                {"role": "assistant", "content": f"Hello. Ask me anything related to the database."}
+                {"role": "assistant", "content": "Hello. Ask me anything related to the database."}
             ]
 
-        st.title(f"{self.page}💬")
+        st.title("Natural Language to SQL Query 💬")
         st.info(
-            f"Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
+            "Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
             icon="ℹ️",
         )
 
+        self.sidebar()
+        self.main()
+
+    def sidebar(self):
+        st.sidebar.header("Navigation")
+        uploaded_file = st.sidebar.file_uploader("Upload a SQLite database", type=["db", "sqlite"])
+        
+        if uploaded_file:
+            # Display tables in the sidebar if a file is uploaded
+            tables = self.get_tables_from_db(uploaded_file)
+            st.sidebar.subheader("Tables in the Database")
+            st.sidebar.write(tables)
+
+    def main(self):
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
 
         def add_to_message_history(role, content):
