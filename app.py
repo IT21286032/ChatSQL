@@ -2,6 +2,9 @@ import streamlit as st
 from sqlalchemy import create_engine, inspect
 from typing import Dict, Any
 
+from llama_index.llama_pack.base import BaseLlamaPack
+
+
 import openai
 import os
 import pandas as pd
