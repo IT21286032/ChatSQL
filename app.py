@@ -70,12 +70,16 @@ class StreamlitChatPack:
         self.sidebar()
         self.main()
     def get_tables_from_db(self, uploaded_file):
-        db_file_path = uploaded_file.name
-        conn = sqlite3.connect(db_file_path)
-        inspector = inspect(conn)
+        if uploaded_file is not None:
+            db_file_path = uploaded_file.name
+        else:
+            db_file_path = "ecommerce_platform1.db"
+    
+        engine = create_engine(f"sqlite:///{db_file_path}")
+        inspector = inspect(engine)
         tables = inspector.get_table_names()
-        conn.close()
         return tables
+
 
     def sidebar(self):
         st.sidebar.header("Navigation")
