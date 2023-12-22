@@ -1,9 +1,28 @@
+
+
 import streamlit as st
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from typing import Dict, Any
 
 from llama_index.llama_pack.base import BaseLlamaPack
+from llama_index.llms import OpenAI
+import openai
+import os
+import pandas as pd
 
+from llama_index.llms.palm import PaLM
+
+from llama_index import (
+    SimpleDirectoryReader,
+    ServiceContext,
+    StorageContext,
+    VectorStoreIndex,
+    load_index_from_storage,
+)
+import sqlite3
+
+from llama_index import SQLDatabase, ServiceContext
+from llama_index.indices.struct_store import NLSQLTableQueryEngine
 
 import openai
 import os
@@ -74,7 +93,7 @@ class StreamlitChatPack(BaseLlamaPack):
                 engine = create_engine("sqlite:///ecommerce_platform1.db")
 
             sql_database = SQLDatabase(engine)
-            #llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
+            llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
             service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
 
             return sql_database, service_context, engine
