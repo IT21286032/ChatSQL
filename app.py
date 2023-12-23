@@ -14,18 +14,13 @@ from llama_index.llama_pack.base import BaseLlamaPack
 from llama_index.llms import OpenAI
 from llama_index.indices.struct_store import NLSQLTableQueryEngine
 
-class StreamlitChatPack(BaseLlamaPack):
-    def __init__(self, page: str = "Natural Language to SQL Query", run_from_main: bool = False, **kwargs: Any) -> None:
-        self.page = page
+class StreamlitChatPack:
+    def __init__(self, run_from_main=False):
+        self.run_from_main = run_from_main
 
-    def get_modules(self) -> Dict[str, Any]:
-        return {}
-
-    def run(self, *args: Any, **kwargs: Any) -> Any:
-        import streamlit as st
-
+    def run(self):
         st.set_page_config(
-            page_title=f"{self.page}",
+            page_title="Natural Language to SQL Query",
             layout="centered",
             initial_sidebar_state="auto",
             menu_items=None,
@@ -33,12 +28,12 @@ class StreamlitChatPack(BaseLlamaPack):
 
         if "messages" not in st.session_state:
             st.session_state["messages"] = [
-                {"role": "assistant", "content": f"Hello. Ask me anything related to the database."}
+                {"role": "assistant", "content": "Hello. Ask me anything related to the database."}
             ]
 
-        st.title(f"{self.page}💬")
+        st.title("Natural Language to SQL Query 💬")
         st.info(
-            f"Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
+            "Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
             icon="ℹ️",
         )
 
@@ -60,35 +55,24 @@ class StreamlitChatPack(BaseLlamaPack):
             else:
                 engine = create_engine("sqlite:///ecommerce_platform1.db")
 
-            sql_database = SQLDatabase(engine)
-            llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
-            service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
-
-            return sql_database, service_context, engine
+            conn = sqlite3.connect(database_file_path)
+            return engine, conn
 
         if uploaded_file is not None:
             db_file_path = uploaded_file.name
         else:
             db_file_path = "ecommerce_platform1.db"
 
-        sql_database, service_context, engine = load_db_llm(db_file_path)
+        engine, conn = load_db_llm(db_file_path)
 
-        if uploaded_file:
-            st.sidebar.markdown("## Database Schema Viewer")
+        inspector = inspect(engine)
+        table_names = inspector.get_table_names()
+        selected_table = st.sidebar.selectbox("Select a Table", table_names)
 
-            inspector = inspect(engine)
-            table_names = inspector.get_table_names()
-            selected_table = st.sidebar.selectbox("Select a Table", table_names)
-
-            db_file = db_file_path
-            conn = sqlite3.connect(db_file)
-
-            if selected_table:
-                df = get_table_data(selected_table, conn)
-                st.sidebar.text(f"Data for table '{selected_table}':")
-                st.sidebar.dataframe(df)
-
-            conn.close()
+        if selected_table:
+            df = get_table_data(selected_table, conn)
+            st.sidebar.text(f"Data for table '{selected_table}':")
+            st.sidebar.dataframe(df)
 
         st.sidebar.markdown('## Database File Information')
         st.sidebar.text(f"Uploaded Database File: {uploaded_file.name}" if uploaded_file else "No file uploaded")
