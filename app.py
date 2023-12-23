@@ -71,8 +71,8 @@ class StreamlitChatPack:
         self.main()
     def get_tables_from_db(self, uploaded_file):
         if uploaded_file:
-        tables = self.get_tables_from_db(uploaded_file)
-        selected_table = st.sidebar.selectbox("Select a Table", tables)
+            tables = self.get_tables_from_db(uploaded_file)
+            selected_table = st.sidebar.selectbox("Select a Table", tables)
 
         if selected_table:
             db_file_path = uploaded_file.name
