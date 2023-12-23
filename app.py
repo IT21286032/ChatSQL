@@ -70,18 +70,16 @@ class StreamlitChatPack:
         self.sidebar()
         self.main()
     def get_tables_from_db(self, uploaded_file):
+        tables = []
         if uploaded_file:
-            tables = self.get_tables_from_db(uploaded_file)
-            selected_table = st.sidebar.selectbox("Select a Table", tables)
-
-        if selected_table:
             db_file_path = uploaded_file.name
             engine = create_engine(f"sqlite:///{db_file_path}")
             conn = engine.connect()
-            df = pd.read_sql_query(f"SELECT * FROM {selected_table}", conn)
-            st.sidebar.text(f"Data for table '{selected_table}':")
-            st.sidebar.dataframe(df)
+            inspector = inspect(conn)
+            tables = inspector.get_table_names()
             conn.close()
+
+        return tables
 
 
     def sidebar(self):
