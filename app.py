@@ -48,7 +48,7 @@ class StreamlitChatPack:
             df = pd.read_sql_query(query, conn)
             return df
 
-        @st.cache_resource
+        @st.cache(allow_output_mutation=True)
         def load_db_llm(database_file_path):
             if uploaded_file:
                 engine = create_engine(f"sqlite:///{database_file_path}")
@@ -76,7 +76,6 @@ class StreamlitChatPack:
 
         st.sidebar.markdown('## Database File Information')
         st.sidebar.text(f"Uploaded Database File: {uploaded_file.name}" if uploaded_file else "No file uploaded")
-
         st.sidebar.markdown('## App Created By')
         st.sidebar.markdown("""
         Harshad Suryawanshi: 
