@@ -1,35 +1,5 @@
-
-
 import streamlit as st
-from sqlalchemy import create_engine, inspect, text
-from typing import Dict, Any
-
 from sqlalchemy import create_engine, inspect
-import pandas as pd
-import sqlite3
-
-from llama_index.llama_pack.base import BaseLlamaPack
-from llama_index.llms import OpenAI
-import openai
-import os
-import pandas as pd
-
-from llama_index.llms.palm import PaLM
-
-from llama_index import (
-    SimpleDirectoryReader,
-    ServiceContext,
-    StorageContext,
-    VectorStoreIndex,
-    load_index_from_storage,
-)
-import sqlite3
-
-from llama_index import SQLDatabase, ServiceContext
-from llama_index.indices.struct_store import NLSQLTableQueryEngine
-
-import openai
-import os
 import pandas as pd
 import sqlite3
 
@@ -38,19 +8,23 @@ from llama_index import (
     ServiceContext,
     VectorStoreIndex,
     load_index_from_storage,
-    SimpleDirectoryReader,
 )
+from llama_index.llama_pack.base import BaseLlamaPack
+from llama_index.llms import OpenAI
 from llama_index.indices.struct_store import NLSQLTableQueryEngine
 
-os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
+class StreamlitChatPack(BaseLlamaPack):
+    def __init__(self, page: str = "Natural Language to SQL Query", run_from_main: bool = False, **kwargs: Any) -> None:
+        self.page = page
 
-class StreamlitChatPack:
-    def __init__(self, run_from_main=False):
-        self.run_from_main = run_from_main
+    def get_modules(self) -> Dict[str, Any]:
+        return {}
 
-    def run(self):
+    def run(self, *args: Any, **kwargs: Any) -> Any:
+        import streamlit as st
+
         st.set_page_config(
-            page_title="Natural Language to SQL Query",
+            page_title=f"{self.page}",
             layout="centered",
             initial_sidebar_state="auto",
             menu_items=None,
@@ -58,41 +32,15 @@ class StreamlitChatPack:
 
         if "messages" not in st.session_state:
             st.session_state["messages"] = [
-                {"role": "assistant", "content": "Hello. Ask me anything related to the database."}
+                {"role": "assistant", "content": f"Hello. Ask me anything related to the database."}
             ]
 
-        st.title("Natural Language to SQL Query 💬")
+        st.title(f"{self.page}💬")
         st.info(
-            "Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
+            f"Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
             icon="ℹ️",
         )
 
-        self.sidebar()
-        self.main()
-    def get_tables_from_db(self, uploaded_file):
-        tables = []
-        if uploaded_file:
-            db_file_path = uploaded_file.name
-            engine = create_engine(f"sqlite:///{db_file_path}")
-            conn = engine.connect()
-            inspector = inspect(conn)
-            tables = inspector.get_table_names()
-            conn.close()
-
-        return tables
-
-
-    def sidebar(self):
-        st.sidebar.header("Navigation")
-        uploaded_file = st.sidebar.file_uploader("Upload a SQLite database", type=["db", "sqlite"])
-        
-        if uploaded_file:
-            # Display tables in the sidebar if a file is uploaded
-            tables = self.get_tables_from_db(uploaded_file)
-            st.sidebar.subheader("Tables in the Database")
-            st.sidebar.write(tables)
-
-    def main(self):
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
 
         def add_to_message_history(role, content):
@@ -124,19 +72,22 @@ class StreamlitChatPack:
 
         sql_database, service_context, engine = load_db_llm(db_file_path)
 
-        inspector = inspect(engine)
-        table_names = inspector.get_table_names()
-        selected_table = st.sidebar.selectbox("Select a Table", table_names)
+        if uploaded_file:
+            st.sidebar.markdown("## Database Schema Viewer")
 
-        db_file = db_file_path
-        conn = sqlite3.connect(db_file)
+            inspector = inspect(engine)
+            table_names = inspector.get_table_names()
+            selected_table = st.sidebar.selectbox("Select a Table", table_names)
 
-        if selected_table:
-            df = get_table_data(selected_table, conn)
-            st.sidebar.text(f"Data for table '{selected_table}':")
-            st.sidebar.dataframe(df)
+            db_file = db_file_path
+            conn = sqlite3.connect(db_file)
 
-        conn.close()
+            if selected_table:
+                df = get_table_data(selected_table, conn)
+                st.sidebar.text(f"Data for table '{selected_table}':")
+                st.sidebar.dataframe(df)
+
+            conn.close()
 
         st.sidebar.markdown('## Database File Information')
         st.sidebar.text(f"Uploaded Database File: {uploaded_file.name}" if uploaded_file else "No file uploaded")
@@ -144,17 +95,17 @@ class StreamlitChatPack:
         st.sidebar.markdown('## App Created By')
         st.sidebar.markdown("""
         Harshad Suryawanshi: 
-        [Linkedin](https://www.linkedin.com/in/harshadsuryawanshi/), [Medium](https://harshadsuryawanshi.medium.com/), [Twitter](https://twitter.com/HarshadSurya1c)
+        [Linkedin](https://www.linkedin.com/in/harshadsuryawanshi/), [Medium](https://harshadsuryawanshi.medium.com/), [X](https://twitter.com/HarshadSurya1c)
         """)
 
-        #st.sidebar.markdown('## Other Projects')
-       # st.sidebar.markdown("""
-       # - [Pokemon Go! Inspired AInimal GO! - Multimodal RAG App](https://www.linkedin.com/posts/harshadsuryawanshi_llamaindex-ai-deeplearning-activity-7134632983495327744-M7yy)
-       # - [Building My Own GPT4-V with PaLM and Kosmos](https://lnkd.in/dawgKZBP)
-       # - [AI Equity Research Analyst](https://ai-eqty-rsrch-anlyst.streamlit.app/)
-       # - [Recasting "The Office" Scene](https://blackmirroroffice.streamlit.app/)
-       # - [Story Generator](https://appstorycombined-agaf9j4ceit.streamlit.app/)
-       # """)
+        st.sidebar.markdown('## Other Projects')
+        st.sidebar.markdown("""
+        - [Pokemon Go! Inspired AInimal GO! - Multimodal RAG App](https://www.linkedin.com/posts/harshadsuryawanshi_llamaindex-ai-deeplearning-activity-7134632983495327744-M7yy)
+        - [Building My Own GPT4-V with PaLM and Kosmos](https://lnkd.in/dawgKZBP)
+        - [AI Equity Research Analyst](https://ai-eqty-rsrch-anlyst.streamlit.app/)
+        - [Recasting "The Office" Scene](https://blackmirroroffice.streamlit.app/)
+        - [Story Generator](https://appstorycombined-agaf9j4ceit.streamlit.app/)
+        """)
 
         st.sidebar.markdown('## Disclaimer')
         st.sidebar.markdown("""
