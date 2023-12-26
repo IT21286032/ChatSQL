@@ -74,23 +74,25 @@ class StreamlitChatPack(BaseLlamaPack):
         def add_to_message_history(role, content):
             message = {"role": role, "content": str(content)}
             st.session_state["messages"].append(message)
-
         def get_table_data(table_name, conn):
             query = f"SELECT * FROM {table_name}"
             df = pd.read_sql_query(query, conn)
             return df
-            
-        @st.cache_resource
-        def load_db_llm():
+        @st.cache(allow_output_mutation=True)
+        def load_db_llm(uploaded_file):
+            sql_database = None
+            service_context = None
+            engine = None
+        
             if uploaded_file:
                 engine = create_engine(f"sqlite:///{uploaded_file}")
-                sql_database = SQLDatabase(engine) #include all tables
+                sql_database = SQLDatabase(engine)  # Include all tables
+        
+            llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
+            service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
+        
+            return sql_database, service_context, engine
 
-                llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
-                service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
-                return sql_database, service_context, engine
-
-        sql_database, service_context, engine = load_db_llm()
 
             
 
