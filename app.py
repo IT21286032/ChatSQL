@@ -64,8 +64,8 @@ class StreamlitChatPack(BaseLlamaPack):
             df = pd.read_sql_query(query, conn)
             return df
             
-         @st.cache_resource
-         def load_db_llm(database_file_path):
+        @st.cache_resource
+        def load_db_llm(database_file_path):
             if uploaded_file:
                 engine = create_engine(f"sqlite:///{database_file_path}")
                 sql_database = SQLDatabase(engine) #include all tables
@@ -74,7 +74,7 @@ class StreamlitChatPack(BaseLlamaPack):
                 service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
                 return sql_database, service_context, engine
 
-          sql_database, service_context, engine = load_db_llm()
+        sql_database, service_context, engine = load_db_llm()
 
             
 
@@ -107,7 +107,7 @@ class StreamlitChatPack(BaseLlamaPack):
         st.sidebar.markdown('## App Created By')
         st.sidebar.markdown("""
         Kajeevan Jeyachandran: 
-        [Linkedin](https://www.linkedin.com/in/kajeevanjeyachandran/)
+        [Linkedin](https://www.linkedin.com/in/kajeevanjeyachandran/ """)
         
         st.sidebar.markdown('## Other Projects')
         st.sidebar.markdown("""
