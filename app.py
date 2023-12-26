@@ -77,18 +77,23 @@ class StreamlitChatPack(BaseLlamaPack):
             return df
 
         @st.cache(allow_output_mutation=True)
+        @st.cache(allow_output_mutation=True)
         def load_db_llm(uploaded_file):
-            engine = create_engine(f"sqlite:///{uploaded_file}")
-            sql_database = SQLDatabase(engine)  # Include all tables
+            if uploaded_file:
+                engine = create_engine(f"sqlite:///{uploaded_file}")
+                sql_database = SQLDatabase(engine)  # Include all tables
+        
+                llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
+                service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
+        
+                inspector = inspect(engine)
+        
+                conn = sqlite3.connect(uploaded_file)
+        
+                return sql_database, service_context, engine, inspector, conn
+            else:
+                return None, None, None, None, None
 
-            llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
-            service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
-
-            inspector = inspect(engine)
-
-            conn = sqlite3.connect(uploaded_file)
-
-            return sql_database, service_context, engine, inspector, conn
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
         sql_database, service_context, engine, inspector, conn = load_db_llm(uploaded_file)
