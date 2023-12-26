@@ -94,12 +94,12 @@ class StreamlitChatPack(BaseLlamaPack):
                     conn = sqlite3.connect(uploaded_file)
                     return inspector, conn
 
-        sql_database, service_context, engine = create_sql_database_and_service_context(uploaded_file)
-        inspector, conn = create_inspector_and_connection(engine, uploaded_file)
+                sql_database, service_context, engine = create_sql_database_and_service_context(uploaded_file)
+                inspector, conn = create_inspector_and_connection(engine, uploaded_file)
 
-        return sql_database, service_context, engine, inspector, conn
-    else:
-        return None, None, None, None, None
+                return sql_database, service_context, engine, inspector, conn
+            else:
+                return None, None, None, None, None
 
 
 
