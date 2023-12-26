@@ -64,8 +64,8 @@ class StreamlitChatPack(BaseLlamaPack):
             df = pd.read_sql_query(query, conn)
             return df
             
-        @st.cache_resource
-        def load_db_llm(database_file_path):
+         @st.cache_resource
+         def load_db_llm(database_file_path):
             if uploaded_file:
                 engine = create_engine(f"sqlite:///{database_file_path}")
                 sql_database = SQLDatabase(engine) #include all tables
