@@ -76,23 +76,31 @@ class StreamlitChatPack(BaseLlamaPack):
             df = pd.read_sql_query(query, conn)
             return df
 
-        @st.cache(allow_output_mutation=True)
-        @st.cache(allow_output_mutation=True)
         def load_db_llm(uploaded_file):
             if uploaded_file:
-                engine = create_engine(f"sqlite:///{uploaded_file}")
-                sql_database = SQLDatabase(engine)  # Include all tables
+                # Cache the SQLDatabase and ServiceContext
+                @st.cache(allow_output_mutation=True)
+                def create_sql_database_and_service_context(uploaded_file):
+                    engine = create_engine(f"sqlite:///{uploaded_file}")
+                    sql_database = SQLDatabase(engine)
+                    llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
+                    service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
+                    return sql_database, service_context, engine
         
-                llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
-                service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
-        
-                inspector = inspect(engine)
-        
-                conn = sqlite3.connect(uploaded_file)
-        
-                return sql_database, service_context, engine, inspector, conn
-            else:
-                return None, None, None, None, None
+                # Cache the inspector and connection separately
+                @st.cache(allow_output_mutation=True)
+                def create_inspector_and_connection(engine, uploaded_file):
+                    inspector = inspect(engine)
+                    conn = sqlite3.connect(uploaded_file)
+                    return inspector, conn
+
+        sql_database, service_context, engine = create_sql_database_and_service_context(uploaded_file)
+        inspector, conn = create_inspector_and_connection(engine, uploaded_file)
+
+        return sql_database, service_context, engine, inspector, conn
+    else:
+        return None, None, None, None, None
+
 
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
