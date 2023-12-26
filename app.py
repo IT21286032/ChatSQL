@@ -16,7 +16,6 @@ from llama_index.indices.struct_store import NLSQLTableQueryEngine
 
 class StreamlitChatPack(BaseLlamaPack):
     def __init__(
-        def __init__(
         self,
         page: str = "Natural Language to SQL Query",
         run_from_main: bool = False,
