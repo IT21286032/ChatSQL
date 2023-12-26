@@ -107,7 +107,9 @@ class StreamlitChatPack(BaseLlamaPack):
 
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
-        sql_database, service_context, engine, inspector, conn = load_db_llm(uploaded_file)
+        with uploaded_file, sqlite3.connect(uploaded_file) as conn:
+            sql_database, service_context, engine, inspector, _ = load_db_llm(uploaded_file)
+
 
     
 
@@ -123,7 +125,7 @@ class StreamlitChatPack(BaseLlamaPack):
             selected_table = st.sidebar.selectbox("Select a Table", table_names)
 
            
-        #conn = sqlite3.connect(uploaded_file)
+        
     
         # Display the selected table
         if selected_table:
@@ -132,7 +134,7 @@ class StreamlitChatPack(BaseLlamaPack):
             st.sidebar.dataframe(df)
     
         # Close the connection
-        #conn.close()
+        conn.close()
                 
         # Sidebar Intro
         st.sidebar.markdown('## App Created By')
