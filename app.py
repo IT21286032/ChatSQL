@@ -74,7 +74,7 @@ class StreamlitChatPack(BaseLlamaPack):
                 service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
                 return sql_database, service_context, engine
 
-         sql_database, service_context, engine = load_db_llm()
+          sql_database, service_context, engine = load_db_llm()
 
             
 
