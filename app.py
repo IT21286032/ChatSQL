@@ -80,9 +80,8 @@ class StreamlitChatPack(BaseLlamaPack):
             return df
         @st.cache(allow_output_mutation=True)
         def load_db_llm(uploaded_file):
-            sql_database = None
-            service_context = None
-            engine = None
+            engine = create_engine(f"sqlite:///{uploaded_file}")
+            sql_database = SQLDatabase(engine) #include all tables
         
             if uploaded_file:
                 engine = create_engine(f"sqlite:///{uploaded_file}")
