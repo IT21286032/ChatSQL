@@ -83,7 +83,7 @@ class StreamlitChatPack(BaseLlamaPack):
         @st.cache_resource
         def load_db_llm(database_file_path):
             if uploaded_file:
-                engine = create_engine(f"sqlite:///{database_file_path}")
+                engine = create_engine(f"sqlite:///{uploaded_file}")
                 sql_database = SQLDatabase(engine) #include all tables
 
                 llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
