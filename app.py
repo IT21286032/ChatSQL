@@ -65,7 +65,7 @@ class StreamlitChatPack(BaseLlamaPack):
             icon="ℹ️",
         )
 
-        uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
+        #uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
 
         def add_to_message_history(role, content):
             message = {"role": role, "content": str(content)}
