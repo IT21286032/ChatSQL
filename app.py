@@ -59,6 +59,9 @@ class StreamlitChatPack(BaseLlamaPack):
                 {"role": "assistant", "content": "Hello. Ask me anything related to the database."}
             ]
 
+        selected_table = None
+
+
         st.title(f"{self.page}💬")
         st.info(
             f"Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
