@@ -29,7 +29,6 @@ from llama_index.indices.struct_store import NLSQLTableQueryEngine
 
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 
-
 class StreamlitChatPack(BaseLlamaPack):
     def __init__(
         self,
@@ -38,7 +37,6 @@ class StreamlitChatPack(BaseLlamaPack):
         **kwargs: Any,
     ) -> None:
         """Init params."""
-        
         self.page = page
 
     def get_modules(self) -> Dict[str, Any]:
@@ -61,9 +59,7 @@ class StreamlitChatPack(BaseLlamaPack):
                 {"role": "assistant", "content": "Hello. Ask me anything related to the database."}
             ]
 
-        st.title(
-            f"{self.page}💬"
-        )
+        st.title(f"{self.page}💬")
         st.info(
             f"Explore Snowflake views with this AI-powered app. Pose any question and receive exact SQL queries.",
             icon="ℹ️",
@@ -74,41 +70,43 @@ class StreamlitChatPack(BaseLlamaPack):
         def add_to_message_history(role, content):
             message = {"role": role, "content": str(content)}
             st.session_state["messages"].append(message)
+
         def get_table_data(table_name, conn):
             query = f"SELECT * FROM {table_name}"
             df = pd.read_sql_query(query, conn)
             return df
+
         @st.cache(allow_output_mutation=True)
         def load_db_llm(uploaded_file):
             engine = create_engine(f"sqlite:///{uploaded_file}")
-            sql_database = SQLDatabase(engine) #include all tables
-        
-            if uploaded_file:
-                engine = create_engine(f"sqlite:///{uploaded_file}")
-                sql_database = SQLDatabase(engine)  # Include all tables
-        
+            sql_database = SQLDatabase(engine)  # Include all tables
+
             llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
             service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
-        
-            return sql_database, service_context, engine
 
+            inspector = inspect(engine)
 
-            
+            conn = sqlite3.connect(uploaded_file)
 
+            return sql_database, service_context, engine, inspector, conn
+
+        uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
+        sql_database, service_context, engine, inspector, conn = load_db_llm(uploaded_file)
+
+    
 
         # Sidebar for database schema viewer
         st.sidebar.markdown("## Database Schema Viewer")
 
-        # Create an inspector object
-        inspector = inspect(engine)
+        # Use the 'inspector' variable here instead of creating a new one
+        if inspector:
+            # Get list of tables in the database
+            table_names = inspector.get_table_names()
 
-        # Get list of tables in the database
-        table_names = inspector.get_table_names()
+            # Sidebar selection for tables
+            selected_table = st.sidebar.selectbox("Select a Table", table_names)
 
-        # Sidebar selection for tables
-        selected_table = st.sidebar.selectbox("Select a Table", table_names)
-
-        
+           
         conn = sqlite3.connect(uploaded_file)
     
         # Display the selected table
