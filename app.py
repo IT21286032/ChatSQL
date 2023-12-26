@@ -120,7 +120,7 @@ class StreamlitChatPack(BaseLlamaPack):
             selected_table = st.sidebar.selectbox("Select a Table", table_names)
 
            
-        conn = sqlite3.connect(uploaded_file)
+        #conn = sqlite3.connect(uploaded_file)
     
         # Display the selected table
         if selected_table:
@@ -129,7 +129,7 @@ class StreamlitChatPack(BaseLlamaPack):
             st.sidebar.dataframe(df)
     
         # Close the connection
-        conn.close()
+        #conn.close()
                 
         # Sidebar Intro
         st.sidebar.markdown('## App Created By')
