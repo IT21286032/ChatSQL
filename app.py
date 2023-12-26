@@ -81,7 +81,7 @@ class StreamlitChatPack(BaseLlamaPack):
             return df
             
         @st.cache_resource
-        def load_db_llm(database_file_path):
+        def load_db_llm():
             if uploaded_file:
                 engine = create_engine(f"sqlite:///{uploaded_file}")
                 sql_database = SQLDatabase(engine) #include all tables
