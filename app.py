@@ -83,8 +83,8 @@ class StreamlitChatPack(BaseLlamaPack):
             if uploaded_file:
                 # Cache the SQLDatabase and ServiceContext
                 @st.cache(allow_output_mutation=True)
-                def create_sql_database_and_service_context(uploaded_file):
-                    engine = create_engine(f"sqlite:///{uploaded_file}")
+                def create_sql_database_and_service_context(file_content):
+                    engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
                     sql_database = SQLDatabase(engine)
                     llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
                     service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
@@ -92,17 +92,22 @@ class StreamlitChatPack(BaseLlamaPack):
         
                 # Cache the inspector and connection separately
                 @st.cache(allow_output_mutation=True)
-                def create_inspector_and_connection(engine, uploaded_file):
+                def create_inspector_and_connection(file_content):
+                    engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
                     inspector = inspect(engine)
-                    conn = sqlite3.connect(uploaded_file)
+                    conn = sqlite3.connect(":memory:")  # Use an in-memory database
                     return inspector, conn
-
-                sql_database, service_context, engine = create_sql_database_and_service_context(uploaded_file)
-                inspector, conn = create_inspector_and_connection(engine, uploaded_file)
-
+        
+                # Read the content of the uploaded file
+                file_content = uploaded_file.read()
+        
+                sql_database, service_context, engine = create_sql_database_and_service_context(file_content)
+                inspector, conn = create_inspector_and_connection(file_content)
+        
                 return sql_database, service_context, engine, inspector, conn
             else:
                 return None, None, None, None, None
+
 
 
 
