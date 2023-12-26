@@ -45,7 +45,7 @@ class StreamlitChatPack(BaseLlamaPack):
                 {"role": "assistant", "content": "Hello. Ask me anything related to the database."}
             ]
 
-         st.title(
+        st.title(
             f"{self.page}💬"
         )
         st.info(
@@ -63,7 +63,7 @@ class StreamlitChatPack(BaseLlamaPack):
             query = f"SELECT * FROM {table_name}"
             df = pd.read_sql_query(query, conn)
             return df
-
+            
         @st.cache_resource
         def load_db_llm(database_file_path):
             if uploaded_file:
