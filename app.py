@@ -81,6 +81,8 @@ class StreamlitChatPack(BaseLlamaPack):
 
         def load_db_llm(uploaded_file):
             if uploaded_file:
+                file_content = uploaded_file.read()
+                
                 # Cache the SQLDatabase and ServiceContext
                 @st.cache(allow_output_mutation=True)
                 def create_sql_database_and_service_context(file_content):
