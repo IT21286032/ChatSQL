@@ -113,8 +113,12 @@ class StreamlitChatPack(BaseLlamaPack):
 
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
-        with uploaded_file, sqlite3.connect(uploaded_file) as conn:
-            sql_database, service_context, engine, inspector, _ = load_db_llm(uploaded_file)
+        if uploaded_file:
+            file_content = uploaded_file.read()
+        
+            with sqlite3.connect(":memory:") as conn:
+                sql_database, service_context, engine, inspector, _ = load_db_llm(file_content)
+
 
 
     
