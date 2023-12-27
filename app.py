@@ -81,8 +81,9 @@ class StreamlitChatPack(BaseLlamaPack):
 
         def load_db_llm(uploaded_file):
             if uploaded_file:
+                # Read the content of the uploaded file
                 file_content = uploaded_file.read()
-                
+        
                 # Cache the SQLDatabase and ServiceContext
                 @st.cache(allow_output_mutation=True)
                 def create_sql_database_and_service_context(file_content):
@@ -100,15 +101,13 @@ class StreamlitChatPack(BaseLlamaPack):
                     conn = sqlite3.connect(":memory:")  # Use an in-memory database
                     return inspector, conn
         
-                # Read the content of the uploaded file
-                file_content = uploaded_file.read()
-        
                 sql_database, service_context, engine = create_sql_database_and_service_context(file_content)
                 inspector, conn = create_inspector_and_connection(file_content)
         
                 return sql_database, service_context, engine, inspector, conn
             else:
                 return None, None, None, None, None
+
 
 
 
