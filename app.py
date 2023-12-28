@@ -154,7 +154,7 @@ st.sidebar.markdown("""
 st.sidebar.markdown('## Disclaimer')
 st.sidebar.markdown("""This application is for demonstration purposes only and may not cover all aspects of real-world data complexities. Please use it as a guide and not as a definitive source for decision-making.""")
 
-        if sql_database is not None:
+if sql_database is not None:
             # Close the connection if it's not None
             if conn is not None:
                 conn.close()
@@ -169,18 +169,18 @@ st.sidebar.markdown("""This application is for demonstration purposes only and m
                 for message in st.session_state["messages"]:  # Display the prior chat messages
                     with st.chat_message(message["role"]):
                         st.write(message["content"])
-        else:
-            st.warning("No database file uploaded. Please upload a valid SQLite database file.")
+else:
+    st.warning("No database file uploaded. Please upload a valid SQLite database file.")
 
-        if prompt := st.chat_input(
+if prompt := st.chat_input(
             "Enter your natural language query about the database"
         ):  # Prompt for user input and save to chat history
             with st.chat_message("user"):
                 st.write(prompt)
             add_to_message_history("user", prompt)
 
-        # If the last message is not from the assistant, generate a new response
-        if st.session_state["messages"][-1]["role"] != "assistant":
+# If the last message is not from the assistant, generate a new response
+if st.session_state["messages"][-1]["role"] != "assistant":
             with st.spinner():
                 with st.chat_message("assistant"):
                     response = st.session_state["query_engine"].query("User Question:"+prompt+". ")
