@@ -39,6 +39,8 @@ def get_table_data(table_name, conn):
     df = pd.read_sql_query(query, conn)
     return df
 
+conn = None
+
 def load_to_llm(uploaded_file):
     if uploaded_file:
         # Read the content of the uploaded file
