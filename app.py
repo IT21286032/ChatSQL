@@ -8,6 +8,8 @@ from contextlib import contextmanager
 from pathlib import Path
 from uuid import uuid4
 
+import os
+
 from llama_index import (
     ServiceContext,
     SQLDatabase,
