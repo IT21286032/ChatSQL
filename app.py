@@ -25,7 +25,7 @@ os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 @contextmanager
 def sqlite_connect(db_bytes):
     fp = Path(str(uuid4()))
-    fp.write_bytes(db_bytes.getvalue())
+    fp.write_bytes(db_bytes)
     conn = sqlite3.connect(str(fp))
 
     try:
@@ -34,16 +34,13 @@ def sqlite_connect(db_bytes):
         conn.close()
         fp.unlink()
 
-def get_table_data(table_name, conn):
-    query = f"SELECT * FROM {table_name}"
-    df = pd.read_sql_query(query, conn)
-    return df
-
-
 def load_db_llm(uploaded_file):
     if uploaded_file:
-        # Read the content of the uploaded file
-        file_content = uploaded_file.read()
+        if isinstance(uploaded_file, bytes):
+            # Read the content of the uploaded file
+            file_content = uploaded_file
+        else:
+            file_content = uploaded_file.read()
 
         # Cache the SQLDatabase and ServiceContext
         @st.cache(allow_output_mutation=True)
