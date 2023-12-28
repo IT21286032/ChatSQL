@@ -22,49 +22,7 @@ from llama_index.indices.struct_store import NLSQLTableQueryEngine
 
 os.environ['OPENAI_API_KEY'] = st.secrets['OPENAI_API_KEY']
 
-@contextmanager
-def sqlite_connect(db_bytes):
-    fp = Path(str(uuid4()))
-    fp.write_bytes(db_bytes)
-    conn = sqlite3.connect(str(fp))
 
-    try:
-        yield conn
-    finally:
-        conn.close()
-        fp.unlink()
-
-def load_db_llm(uploaded_file):
-    if uploaded_file:
-        if isinstance(uploaded_file, bytes):
-            # Read the content of the uploaded file
-            file_content = uploaded_file
-        else:
-            file_content = uploaded_file.read()
-
-        # Cache the SQLDatabase and ServiceContext
-        @st.cache(allow_output_mutation=True)
-        def create_sql_database_and_service_context(file_content):
-            engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
-            sql_database = SQLDatabase(engine)
-            llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
-            service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
-            return sql_database, service_context, engine
-
-        # Cache the inspector and connection separately
-        @st.cache(allow_output_mutation=True)
-        def create_inspector_and_connection(file_content):
-            engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
-            inspector = inspect(engine)
-            conn = sqlite3.connect(":memory:")  # Use an in-memory database
-            return inspector, conn
-
-        sql_database, service_context, engine = create_sql_database_and_service_context(file_content)
-        inspector, conn = create_inspector_and_connection(file_content)
-
-        return sql_database, service_context, engine, inspector, conn
-    else:
-        return None, None, None, None, None
 
 class StreamlitChatPack(BaseLlamaPack):
     def __init__(
@@ -109,6 +67,56 @@ class StreamlitChatPack(BaseLlamaPack):
             st.session_state["messages"].append(
                 message
             )  # Add response to message history
+
+        def get_table_data(table_name, conn):
+            query = f"SELECT * FROM {table_name}"
+            df = pd.read_sql_query(query, conn)
+            return df
+
+        @contextmanager
+        def sqlite_connect(db_bytes):
+            fp = Path(str(uuid4()))
+            fp.write_bytes(db_bytes)
+            conn = sqlite3.connect(str(fp))
+        
+            try:
+                yield conn
+            finally:
+                conn.close()
+                fp.unlink()
+        
+        def load_db_llm(uploaded_file):
+            if uploaded_file:
+                if isinstance(uploaded_file, bytes):
+                    # Read the content of the uploaded file
+                    file_content = uploaded_file
+                else:
+                    file_content = uploaded_file.read()
+        
+                # Cache the SQLDatabase and ServiceContext
+                @st.cache(allow_output_mutation=True)
+                def create_sql_database_and_service_context(file_content):
+                    engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
+                    sql_database = SQLDatabase(engine)
+                    llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
+                    service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
+                    return sql_database, service_context, engine
+        
+                # Cache the inspector and connection separately
+                @st.cache(allow_output_mutation=True)
+                def create_inspector_and_connection(file_content):
+                    engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
+                    inspector = inspect(engine)
+                    conn = sqlite3.connect(":memory:")  # Use an in-memory database
+                    return inspector, conn
+        
+                sql_database, service_context, engine = create_sql_database_and_service_context(file_content)
+                inspector, conn = create_inspector_and_connection(file_content)
+        
+                return sql_database, service_context, engine, inspector, conn
+            else:
+                return None, None, None, None, None
+        
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
         conn = None
