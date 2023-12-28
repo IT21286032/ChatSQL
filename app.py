@@ -116,11 +116,11 @@ class StreamlitChatPack(BaseLlamaPack):
 
 
         if uploaded_file:
-    file_content = uploaded_file.read()
+            file_content = uploaded_file.read()
 
-    with sqlite3.connect(":memory:") as temp_conn:
-        sql_database, service_context, _ = load_db_llm(file_content)
-        conn = temp_conn
+        with sqlite3.connect(":memory:") as temp_conn:
+            sql_database, service_context, _ = load_db_llm(file_content)
+            conn = temp_conn
 
 # Sidebar for database schema viewer
 st.sidebar.markdown("## Database Schema Viewer")
