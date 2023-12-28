@@ -39,7 +39,6 @@ def get_table_data(table_name, conn):
     df = pd.read_sql_query(query, conn)
     return df
 
-conn = None
 
 def load_to_llm(uploaded_file):
     if uploaded_file:
@@ -109,11 +108,14 @@ class StreamlitChatPack(BaseLlamaPack):
         )
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
+        conn = None
+
         if uploaded_file:
             file_content = uploaded_file.read()
             
-            with sqlite3.connect(":memory:") as conn:
+            with sqlite3.connect(":memory:") as temp_conn:
                 sql_database, service_context, engine, inspector, _ = load_db_llm(file_content)
+                conn = temp_conn
 
             # Sidebar for database schema viewer
             st.sidebar.markdown("## Database Schema Viewer")
