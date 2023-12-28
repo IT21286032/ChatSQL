@@ -137,9 +137,7 @@ class StreamlitChatPack(BaseLlamaPack):
             st.sidebar.text(f"Data for table '{selected_table}':")
             st.sidebar.dataframe(df)
 
-        # Close the connection
-        if conn is not None:
-            conn.close()
+        
 
         # Sidebar Intro
         st.sidebar.markdown('## App Created By')
@@ -154,16 +152,23 @@ class StreamlitChatPack(BaseLlamaPack):
         st.sidebar.markdown('## Disclaimer')
         st.sidebar.markdown("""This application is for demonstration purposes only and may not cover all aspects of real-world data complexities. Please use it as a guide and not as a definitive source for decision-making.""")
 
-        if "query_engine" not in st.session_state:  # Initialize the query engine
-            st.session_state["query_engine"] = NLSQLTableQueryEngine(
-                sql_database=sql_database,
-                synthesize_response=True,
-                service_context=service_context
-            )
+        if sql_database is not None:
+            # Close the connection if it's not None
+            if conn is not None:
+                conn.close()
 
-        for message in st.session_state["messages"]:  # Display the prior chat messages
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
+                if "query_engine" not in st.session_state:  # Initialize the query engine
+                    st.session_state["query_engine"] = NLSQLTableQueryEngine(
+                        sql_database=sql_database,
+                        synthesize_response=True,
+                        service_context=service_context
+                    )
+        
+                for message in st.session_state["messages"]:  # Display the prior chat messages
+                    with st.chat_message(message["role"]):
+                        st.write(message["content"])
+        else:
+            st.warning("No database file uploaded. Please upload a valid SQLite database file.")
 
         if prompt := st.chat_input(
             "Enter your natural language query about the database"
