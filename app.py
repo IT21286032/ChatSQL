@@ -109,6 +109,7 @@ class StreamlitChatPack(BaseLlamaPack):
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
         conn = None
+        sql_database = None  # Initialize sql_database outside the if block
 
         if uploaded_file:
             file_content = uploaded_file.read()
