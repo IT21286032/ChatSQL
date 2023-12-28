@@ -135,7 +135,8 @@ class StreamlitChatPack(BaseLlamaPack):
             st.sidebar.dataframe(df)
 
         # Close the connection
-        conn.close()
+        if conn is not None:
+            conn.close()
 
         # Sidebar Intro
         st.sidebar.markdown('## App Created By')
