@@ -88,35 +88,26 @@ class StreamlitChatPack(BaseLlamaPack):
         def load_db_llm(uploaded_file):
             if uploaded_file:
                 if isinstance(uploaded_file, bytes):
-                    # Read the content of the uploaded file
+                    # Use the provided bytes directly
                     file_content = uploaded_file
                 else:
                     file_content = uploaded_file.read()
-        
+
                 # Cache the SQLDatabase and ServiceContext
                 @st.cache(allow_output_mutation=True)
                 def create_sql_database_and_service_context(file_content):
-                    engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
+                    engine = create_engine(f"sqlite:///:memory:")
                     sql_database = SQLDatabase(engine)
                     llm2 = OpenAI(temperature=0.1, model="gpt-3.5-turbo-1106")
                     service_context = ServiceContext.from_defaults(llm=llm2, embed_model="local")
                     return sql_database, service_context, engine
-        
-                # Cache the inspector and connection separately
-                @st.cache(allow_output_mutation=True)
-                def create_inspector_and_connection(file_content):
-                    engine = create_engine(f"sqlite:///:memory:")  # Use an in-memory database
-                    inspector = inspect(engine)
-                    conn = sqlite3.connect(":memory:")  # Use an in-memory database
-                    return inspector, conn
-        
+
                 sql_database, service_context, engine = create_sql_database_and_service_context(file_content)
-                inspector, conn = create_inspector_and_connection(file_content)
-        
-                return sql_database, service_context, engine, inspector, conn
+
+                return sql_database, service_context, engine
+
             else:
-                return None, None, None, None, None
-        
+                return None, None, None
 
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
         conn = None
@@ -125,32 +116,33 @@ class StreamlitChatPack(BaseLlamaPack):
 
 
         if uploaded_file:
-            file_content = uploaded_file.read()
-            
-            with sqlite3.connect(":memory:") as temp_conn:
-                sql_database, service_context, engine, inspector, _ = load_db_llm(file_content)
-                conn = temp_conn
+    file_content = uploaded_file.read()
 
-            # Sidebar for database schema viewer
-            st.sidebar.markdown("## Database Schema Viewer")
+    with sqlite3.connect(":memory:") as temp_conn:
+        sql_database, service_context, _ = load_db_llm(file_content)
+        conn = temp_conn
 
-            # Use the 'inspector' variable here instead of creating a new one
-            if inspector:
-                # Get list of tables in the database
-                table_names = inspector.get_table_names()
+# Sidebar for database schema viewer
+st.sidebar.markdown("## Database Schema Viewer")
 
-                # Sidebar selection for tables
-                selected_table = st.sidebar.selectbox("Select a Table", table_names)
+# Use the 'inspector' variable here instead of creating a new one
+inspector = inspect(conn)
+if inspector:
+    # Get list of tables in the database
+    table_names = inspector.get_table_names()
 
-        # Display the selected table
-        if selected_table:
-            df = get_table_data(selected_table, conn)
-            st.sidebar.text(f"Data for table '{selected_table}':")
-            st.sidebar.dataframe(df)
+    # Sidebar selection for tables
+    selected_table = st.sidebar.selectbox("Select a Table", table_names)
+
+# Display the selected table
+if selected_table:
+    df = get_table_data(selected_table, conn)
+    st.sidebar.text(f"Data for table '{selected_table}':")
+    st.sidebar.dataframe(df)
 
         
 
-        # Sidebar Intro
+# Sidebar Intro
         st.sidebar.markdown('## App Created By')
         st.sidebar.markdown("""
             Kajeevan Jeyachandran: 
