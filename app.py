@@ -122,73 +122,73 @@ class StreamlitChatPack(BaseLlamaPack):
             sql_database, service_context, _ = load_db_llm(file_content)
             conn = temp_conn
 
-# Sidebar for database schema viewer
-st.sidebar.markdown("## Database Schema Viewer")
-
-# Use the 'inspector' variable here instead of creating a new one
-inspector = inspect(conn)
-if inspector:
-    # Get list of tables in the database
-    table_names = inspector.get_table_names()
-
-    # Sidebar selection for tables
-    selected_table = st.sidebar.selectbox("Select a Table", table_names)
-
-# Display the selected table
-if selected_table:
-    df = get_table_data(selected_table, conn)
-    st.sidebar.text(f"Data for table '{selected_table}':")
-    st.sidebar.dataframe(df)
-
+        # Sidebar for database schema viewer
+        st.sidebar.markdown("## Database Schema Viewer")
         
-
-# Sidebar Intro
-st.sidebar.markdown('## App Created By')
-
-st.sidebar.markdown("""
-            Kajeevan Jeyachandran: 
-            [Linkedin](https://www.linkedin.com/in/kajeevanjeyachandran/ """)
-
+        # Use the 'inspector' variable here instead of creating a new one
+        inspector = inspect(conn)
+        if inspector:
+            # Get list of tables in the database
+            table_names = inspector.get_table_names()
         
-
-st.sidebar.markdown('## Disclaimer')
-st.sidebar.markdown("""This application is for demonstration purposes only and may not cover all aspects of real-world data complexities. Please use it as a guide and not as a definitive source for decision-making.""")
-
-if sql_database is not None:
-            # Close the connection if it's not None
-            if conn is not None:
-                conn.close()
-
-                if "query_engine" not in st.session_state:  # Initialize the query engine
-                    st.session_state["query_engine"] = NLSQLTableQueryEngine(
-                        sql_database=sql_database,
-                        synthesize_response=True,
-                        service_context=service_context
-                    )
+            # Sidebar selection for tables
+            selected_table = st.sidebar.selectbox("Select a Table", table_names)
         
-                for message in st.session_state["messages"]:  # Display the prior chat messages
-                    with st.chat_message(message["role"]):
-                        st.write(message["content"])
-else:
-    st.warning("No database file uploaded. Please upload a valid SQLite database file.")
-
-if prompt := st.chat_input(
-            "Enter your natural language query about the database"
-        ):  # Prompt for user input and save to chat history
-            with st.chat_message("user"):
-                st.write(prompt)
-            add_to_message_history("user", prompt)
-
-# If the last message is not from the assistant, generate a new response
-if st.session_state["messages"][-1]["role"] != "assistant":
-            with st.spinner():
-                with st.chat_message("assistant"):
-                    response = st.session_state["query_engine"].query("User Question:"+prompt+". ")
-                    sql_query = f"```sql\n{response.metadata['sql_query']}\n```\n**Response:**\n{response.response}\n"
-                    response_container = st.empty()
-                    response_container.write(sql_query)
-                    add_to_message_history("assistant", sql_query)
+        # Display the selected table
+        if selected_table:
+            df = get_table_data(selected_table, conn)
+            st.sidebar.text(f"Data for table '{selected_table}':")
+            st.sidebar.dataframe(df)
+        
+                
+        
+        # Sidebar Intro
+        st.sidebar.markdown('## App Created By')
+        
+        st.sidebar.markdown("""
+                    Kajeevan Jeyachandran: 
+                    [Linkedin](https://www.linkedin.com/in/kajeevanjeyachandran/ """)
+        
+                
+        
+        st.sidebar.markdown('## Disclaimer')
+        st.sidebar.markdown("""This application is for demonstration purposes only and may not cover all aspects of real-world data complexities. Please use it as a guide and not as a definitive source for decision-making.""")
+        
+        if sql_database is not None:
+                    # Close the connection if it's not None
+                    if conn is not None:
+                        conn.close()
+        
+                        if "query_engine" not in st.session_state:  # Initialize the query engine
+                            st.session_state["query_engine"] = NLSQLTableQueryEngine(
+                                sql_database=sql_database,
+                                synthesize_response=True,
+                                service_context=service_context
+                            )
+                
+                        for message in st.session_state["messages"]:  # Display the prior chat messages
+                            with st.chat_message(message["role"]):
+                                st.write(message["content"])
+        else:
+            st.warning("No database file uploaded. Please upload a valid SQLite database file.")
+        
+        if prompt := st.chat_input(
+                    "Enter your natural language query about the database"
+                ):  # Prompt for user input and save to chat history
+                    with st.chat_message("user"):
+                        st.write(prompt)
+                    add_to_message_history("user", prompt)
+        
+        # If the last message is not from the assistant, generate a new response
+        if st.session_state["messages"][-1]["role"] != "assistant":
+                    with st.spinner():
+                        with st.chat_message("assistant"):
+                            response = st.session_state["query_engine"].query("User Question:"+prompt+". ")
+                            sql_query = f"```sql\n{response.metadata['sql_query']}\n```\n**Response:**\n{response.response}\n"
+                            response_container = st.empty()
+                            response_container.write(sql_query)
+                            add_to_message_history("assistant", sql_query)
 if __name__ == "__main__":
-    StreamlitChatPack(run_from_main=True).run()
-
-    
+            StreamlitChatPack(run_from_main=True).run()
+        
+            
