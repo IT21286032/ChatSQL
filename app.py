@@ -104,6 +104,12 @@ class StreamlitChatPack(BaseLlamaPack):
             icon="ℹ️",
         )
 
+        def add_to_message_history(role, content):
+            message = {"role": role, "content": str(content)}
+            st.session_state["messages"].append(
+                message
+            )  # Add response to message history
+
         uploaded_file = st.file_uploader("Upload your SQLite database file", type=["db", "sqlite"])
         conn = None
         sql_database = None  # Initialize sql_database outside the if block
