@@ -66,7 +66,7 @@ def load_to_llm(uploaded_file):
     else:
         return None, None, None, None, None
 
-    class StreamlitChatPack(BaseLlamaPack):
+class StreamlitChatPack(BaseLlamaPack):
     def __init__(
         self,
         page: str = "Natural Language to SQL Query",
@@ -171,6 +171,7 @@ def load_to_llm(uploaded_file):
                     response_container = st.empty()
                     response_container.write(sql_query)
                     add_to_message_history("assistant", sql_query)
-
 if __name__ == "__main__":
     StreamlitChatPack(run_from_main=True).run()
+
+    
