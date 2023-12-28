@@ -40,7 +40,7 @@ def get_table_data(table_name, conn):
     return df
 
 
-def load_to_llm(uploaded_file):
+def load_db_llm(uploaded_file):
     if uploaded_file:
         # Read the content of the uploaded file
         file_content = uploaded_file.read()
