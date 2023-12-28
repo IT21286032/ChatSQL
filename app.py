@@ -143,17 +143,16 @@ if selected_table:
         
 
 # Sidebar Intro
-        st.sidebar.markdown('## App Created By')
-        st.sidebar.markdown("""
+st.sidebar.markdown('## App Created By')
+
+st.sidebar.markdown("""
             Kajeevan Jeyachandran: 
             [Linkedin](https://www.linkedin.com/in/kajeevanjeyachandran/ """)
 
-        st.sidebar.markdown('## Other Projects')
-        st.sidebar.markdown("""
-        """)
+        
 
-        st.sidebar.markdown('## Disclaimer')
-        st.sidebar.markdown("""This application is for demonstration purposes only and may not cover all aspects of real-world data complexities. Please use it as a guide and not as a definitive source for decision-making.""")
+st.sidebar.markdown('## Disclaimer')
+st.sidebar.markdown("""This application is for demonstration purposes only and may not cover all aspects of real-world data complexities. Please use it as a guide and not as a definitive source for decision-making.""")
 
         if sql_database is not None:
             # Close the connection if it's not None
